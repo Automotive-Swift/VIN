@@ -73,4 +73,13 @@ class VINTest: XCTestCase {
 
         XCTAssertEqual(vin1, vin2)
     }
+
+    func testParts() throws {
+        let vin: VIN = "WAUZZZ8X7CB000001"
+
+        XCTAssertEqual(vin.wmi, "WAU")
+        XCTAssertEqual(vin.vds, "ZZZ8X7")
+        XCTAssertEqual(vin.vis, "CB000001")
+    }
 }
+
