@@ -3,6 +3,11 @@ import XCTest
 
 class VINTest: XCTestCase {
 
+    func testUnknown() {
+
+        XCTAssertTrue(VIN.Unknown.isValid)
+    }
+
     func testValid() {
 
         let valid = [

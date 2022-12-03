@@ -8,6 +8,7 @@ public struct VIN: Equatable {
 
     public static let NumberOfCharacters: Int = 17
     public static let AllowedCharacters: CharacterSet = .init(charactersIn: "ABCDEFGHJKLMNPRSTUVWXYZ0123456789")
+    public static let Unknown: VIN = .init(content: "UNKNWN78901234567")
 
     /// The 17 characters as a String.
     public let content: String
