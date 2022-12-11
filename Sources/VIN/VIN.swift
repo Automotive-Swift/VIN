@@ -13,7 +13,7 @@ public struct VIN: Equatable {
     /// The 17 characters as a String.
     public let content: String
 
-    /// Whether the VIN is syntactically valid, i.e. contains of the right kind and amount of characters.
+    /// Whether the VIN is syntactically valid, i.e. contains the right kind and amount of characters.
     public var isValid: Bool {
         guard self.content.count == Self.NumberOfCharacters else { return false }
         guard self.content.rangeOfCharacter(from: Self.AllowedCharacters.inverted) == nil else { return false }
@@ -49,6 +49,9 @@ public struct VIN: Equatable {
     public init(content: String) {
         self.content = content
     }
+
+    /// Convenience method, if all you want to check for is validity.
+    public static func isValid(_ vin: String) -> Bool { VIN(content: vin).isValid }
 }
 
 extension VIN: Identifiable {
