@@ -1,5 +1,5 @@
 //
-//  Cornucopia – (C) Dr. Lauer Information Technology
+// VIN. (C) 2016-2023 Dr. Michael 'Mickey' Lauer <mickey@Vanille.de>
 //
 import Foundation
 
@@ -28,6 +28,34 @@ public struct VIN: Equatable {
         return String(sub)
     }
 
+    /// The world manufacturer region.
+    public var wmiRegion: String {
+        let wmi = self.wmi
+        guard wmi != "" else { return "" }
+        let index = wmi.index(self.content.startIndex, offsetBy: 1)
+        let prefix = wmi[..<index]
+        let fullKey = "ISO3780_WMI_REGION_\(prefix)"
+        return self.computeLocalization(forKey: fullKey)
+    }
+
+    /// The world manufacturer country.
+    public var wmiCountry: String {
+        let wmi = self.wmi
+        guard wmi != "" else { return "" }
+        let index = wmi.index(self.content.startIndex, offsetBy: 2)
+        let prefix = wmi[..<index]
+        let fullKey = "ISO3780_WMI_COUNTRY_\(prefix)"
+        return self.computeLocalization(forKey: fullKey)
+    }
+
+    // The world manufacturer manufacturer
+    public var wmiManufacturer: String {
+        let wmi = self.wmi
+        guard wmi != "" else { return "" }
+        let fullKey = "ISO3780_WMI_MANUFACTURER_\(wmi)"
+        return self.computeLocalization(forKey: fullKey)
+    }
+
     /// The vehicle descriptor section.
     public var vds: String {
         guard self.isValid else { return "" }
@@ -52,6 +80,20 @@ public struct VIN: Equatable {
 
     /// Convenience method, if all you want to check for is validity.
     public static func isValid(_ vin: String) -> Bool { VIN(content: vin).isValid }
+}
+
+private extension VIN {
+
+    func computeLocalization(forKey key: String) -> String {
+
+        var string = NSLocalizedString(key, bundle: .module, value: "?", comment: "")
+        if string != "?" { return string }
+
+        var shorterKey = key
+        shorterKey.removeLast()
+        string = NSLocalizedString(shorterKey, bundle: .module, value: "?", comment: "")
+        return string
+    }
 }
 
 extension VIN: Identifiable {

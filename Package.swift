@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "VIN",
+    defaultLocalization: "en",
     platforms: [
         .macOS(.v11),
         .iOS(.v13),

@@ -86,5 +86,23 @@ class VINTest: XCTestCase {
         XCTAssertEqual(vin.vds, "ZZZ8X7")
         XCTAssertEqual(vin.vis, "CB000001")
     }
+
+    func testRegion() throws {
+
+        let vin: VIN = "WAUZZZ8X7CB000001"
+        XCTAssertNotEqual(vin.wmiRegion, "?")
+    }
+
+    func testCountry() throws {
+
+        let vin: VIN = "WAUZZZ8X7CB000001"
+        XCTAssertNotEqual(vin.wmiCountry, "?")
+    }
+
+    func testManufacturer() throws {
+
+        let vin: VIN = "WAUZZZ8X7CB000001"
+        XCTAssertNotEqual(vin.wmiManufacturer, "?")
+    }
 }
 

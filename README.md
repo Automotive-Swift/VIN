@@ -1,3 +1,4 @@
 # VIN
 
-Handling Vehicle Information Numbers with Swift.
+A micro-library for handling ISO3780 Vehicle Information Numbers with Swift.
+
