@@ -4,7 +4,7 @@
 import Foundation
 
 /// The Vehicle Identification Number, as standardized in ISO 3779.
-public struct VIN: Equatable {
+public struct VIN: Equatable, Hashable {
 
     public static let NumberOfCharacters: Int = 17
     public static let AllowedCharacters: CharacterSet = .init(charactersIn: "ABCDEFGHJKLMNPRSTUVWXYZ0123456789")
