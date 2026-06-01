@@ -1,6 +1,8 @@
 # VIN Swift Package
 
-A zero-dependency Swift package for handling ISO 3779 Vehicle Identification Numbers (VINs) with comprehensive validation, parsing, and localization support.
+A zero-dependency Swift package for handling ISO 3779 Vehicle Identification Numbers (VINs) with comprehensive validation, parsing, and structured identity decoding.
+
+> **Upgrading from 1.x?** `2.0.0` is a breaking redesign — see [MIGRATION.md](MIGRATION.md).
 
 ## Features
 
