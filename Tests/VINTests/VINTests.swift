@@ -80,7 +80,26 @@ struct VINTests {
         // Asian VINs
         let japaneseVIN: VIN = "JN1TFNT32A0041590"
         #expect(japaneseVIN.isValid)
+        #expect(japaneseVIN.validity == .valid)
+        #expect(!japaneseVIN.isChecksumValid)
         #expect(japaneseVIN.validity.isSyntacticallyValid)
+    }
+
+    @Test("Asian VINs do not require check digits")
+    func testAsianVINsDoNotRequireCheckDigits() {
+        let nonChecksumAsianVINs = [
+            "JN1TFNT32A0041590", // Japan, syntactic VIN with non-matching check digit
+            "KMHWF35H66A023847", // Korea, syntactic VIN with non-matching check digit
+            "LVSFBFACXDF123456", // China, syntactic VIN with non-matching check digit
+        ]
+
+        for vinString in nonChecksumAsianVINs {
+            let vin = VIN(content: vinString)
+            #expect(vin.region == .asia)
+            #expect(vin.isValid, "VIN \(vinString) should be syntactically valid")
+            #expect(vin.validity == .valid, "VIN \(vinString) should not be rejected for a non-matching check digit")
+            #expect(!vin.isChecksumValid, "VIN \(vinString) should expose the non-matching check digit separately")
+        }
     }
 
     @Test("Backward compatibility of isValid property")
@@ -304,18 +323,32 @@ struct VINTests {
         #expect(VIN(content: "1HGBH41JXMN109186").regionCode == "US")
         #expect(VIN(content: "JN1TFNT32A0041590").regionCode == "JP")
         #expect(VIN(content: "KMHWF35H66A023847").regionCode == "KR")
+        #expect(VIN(content: "LVSFBFACXDF123456").regionCode == "CN")
+        #expect(VIN(content: "MA1BB7A96E6014216").regionCode == "IN")
         // Decodes from a 2-character prefix, no full VIN required.
         #expect(VIN(content: "WB").regionCode == "DE")
         #expect(VIN(content: "1").regionCode == nil, "One character is ambiguous")
+        #expect(VIN(content: "II").regionCode == nil, "Invalid WMI characters are not mapped")
     }
 
     @Test("Continent and flag")
     func testContinentAndFlag() throws {
+        #expect(VIN(content: "AA9").region == .africa)
         #expect(VIN(content: "WAU").region == .europe)
         #expect(VIN(content: "1HG").region == .northAmerica)
         #expect(VIN(content: "JHM").region == .asia)
+        #expect(VIN(content: "6FP").region == .oceania)
+        #expect(VIN(content: "9BW").region == .southAmerica)
+        #expect(VIN(content: "O").region == nil)
         #expect(VIN(content: "WAUZZZ8X7CB000001").flag == "🇩🇪")
         #expect(VIN(content: "1HGBH41JXMN109186").flag == "🇺🇸")
+        #expect(VIN(content: "1").flag == nil)
+    }
+
+    @Test("Country name lookup")
+    func testCountryName() throws {
+        #expect(VIN(content: "1").countryName == nil)
+        #expect(VIN(content: "WAUZZZ8X7CB000001").countryName != nil)
     }
 
     @Test("Manufacturer lookup")
@@ -324,6 +357,7 @@ struct VINTests {
         #expect(VIN(content: "1HGBH41JXMN109186").manufacturer?.contains("Honda") == true)
         // Resolves from a 3-character WMI prefix.
         #expect(VIN(content: "WAU").manufacturer == "Audi")
+        #expect(VIN(content: "JNX").manufacturer == "Nissan")
         // Unknown WMI returns nil (not a sentinel).
         #expect(VIN(content: "WZZ").manufacturer == nil)
     }
@@ -336,6 +370,8 @@ struct VINTests {
         #expect(vin.serialNumber == "109186")
         // Needs at least 10 characters.
         #expect(VIN(content: "1HGBH41JX").modelYear == nil)
+        #expect(VIN(content: "1HGBH41JXM").assemblyPlant == nil)
+        #expect(VIN(content: "1HGBH41JXMN").serialNumber == nil)
     }
 
     @Test("Expected vs actual check digit")

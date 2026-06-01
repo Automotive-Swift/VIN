@@ -16,7 +16,7 @@ public enum Continent: String, Equatable, Hashable, Sendable, CaseIterable {
     init?(wmiLeadingCharacter c: Character) {
         switch c {
             case "A"..."H": self = .africa
-            case "J"..."R": self = .asia
+            case "J"..."N", "P", "R": self = .asia
             case "S"..."Z": self = .europe
             case "1"..."5": self = .northAmerica
             case "6", "7": self = .oceania
