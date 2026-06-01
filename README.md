@@ -52,17 +52,23 @@ VIN.isValid("1HGBH41JX")             // false (too short)
 
 // Checksum validation
 vin.isChecksumValid                   // true
-vin.checksumDigit                     // Optional("X")
+vin.actualCheckDigit                  // Optional("X") — the digit present at position 9
+vin.expectedCheckDigit                // Optional("X") — the computed digit
 
-// Access VIN components
+// Access VIN components (decode from any sufficiently long prefix)
 vin.wmi                              // "1HG" (World Manufacturer Identifier)
 vin.vds                              // "BH41JX" (Vehicle Descriptor Section)
 vin.vis                              // "MN109186" (Vehicle Identification Section)
+vin.modelYear                        // Optional(2021) — position 10
+vin.assemblyPlant                    // Optional("N") — position 11
+vin.serialNumber                     // Optional("109186") — positions 12–17
 
-// Localized manufacturer information
-vin.wmiRegion                        // "North America"
-vin.wmiCountry                       // "United States"
-vin.wmiManufacturer                  // "Honda"
+// Structured identity (nil when unknown)
+vin.regionCode                       // Optional("US") — ISO 3166-1 alpha-2
+vin.countryName                      // Optional("United States") — localized via Locale
+vin.flag                             // Optional("🇺🇸")
+vin.region                           // Optional(.northAmerica)
+vin.manufacturer                     // Optional("Honda")
 ```
 
 ## Tri-State Validity Model
@@ -123,20 +129,18 @@ let withChecksum = european.propose()
 // Result: European VIN with proper checksum calculated
 ```
 
-## Localization Support
+## Identity & localization
 
-The library includes extensive manufacturer data in multiple languages:
+Manufacturer names ship as a built-in Swift directory (650+ WMIs) and are returned as proper nouns. Country localization is delegated to the operating system: `regionCode` is an ISO 3166-1 alpha-2 code, and `countryName` resolves it through `Locale` — so country names localize automatically in *every* OS language, with no bundled string tables to maintain.
 
 ```swift
 let audiVin: VIN = "WAUZZZ4L78D067850"
-print(audiVin.wmiManufacturer)  // "Audi AG" (English)
-// Also available in German and French localizations
+audiVin.manufacturer   // "Audi"
+audiVin.regionCode     // "DE"
+audiVin.countryName    // "Germany" (or "Deutschland", … depending on Locale)
+audiVin.flag           // "🇩🇪"
+audiVin.region         // .europe
 ```
-
-**Supported languages:**
-- English (`en.lproj`)
-- German (`de.lproj`) 
-- French (`fr.lproj`)
 
 ## Constants
 

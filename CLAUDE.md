@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Build and Test:**
 - `swift build` - Build the library
-- `swift test` - Run the test suite (26 tests covering tri-state validity, validation, parsing, localization, and VIN proposal)
+- `swift test` - Run the test suite (covers tri-state validity, checksum math, parsing, region/manufacturer/model-year decoding, partial-input decoding, and VIN proposal)
 - `swift package generate-xcodeproj` - Generate Xcode project if needed
 
 ## Architecture
@@ -32,11 +32,11 @@ The library uses a tri-state validity enum to reflect that checksum validation i
 - `.validWithChecksum` - Syntactically valid AND checksum verified
 This design recognizes that North American VINs mandate checksums while European and other regions may not
 
-**Localization-Driven WMI Data:**
-- WMI region/country/manufacturer lookups are powered by extensive localization files (561 manufacturers)
-- Located in `Sources/VIN/Resources/{en,de,fr}.lproj/Localizable.strings`
-- Fallback mechanism: tries exact WMI match first, then shorter prefixes
-- When adding new WMI data, update all localization files to maintain consistency
+**WMI / region data (structured, not localized strings):**
+- Manufacturer directory: `Sources/VIN/VINManufacturers.swift` (650+ WMIs, Swift `[String: String]`). Names are proper nouns, not localized. Lookup tries the 3-character WMI, then the 2-character prefix. Add new makers here.
+- Region/country: `Sources/VIN/VINRegions.swift` ports the ISO 3780 Annex A ranges to ISO 3166-1 alpha-2 codes (`regionCode`); country *names* are derived via `Locale` (so they localize in every OS language with no string tables). Also holds the `Continent` enum and the position-10 model-year table.
+- Identity accessors decode from any sufficiently long prefix (≥1/≥2/≥3/≥10 chars) — no full-VIN gate — so they work for live input.
+- The old `.lproj` string tables and `wmiRegion`/`wmiCountry`/`wmiManufacturer`/`checksumDigit` accessors were removed in the v2 redesign (see tag `pre-API-change`).
 
 ## Development Guidelines
 

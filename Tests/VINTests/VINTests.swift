@@ -143,16 +143,16 @@ struct VINTests {
     @Test("Checksum digit getter")
     func testChecksumDigitGetter() {
         let vin1: VIN = "1FMEE5DH5NLA77159"
-        #expect(vin1.checksumDigit == "5", "Checksum digit should be '5'")
+        #expect(vin1.actualCheckDigit == "5", "Checksum digit should be '5'")
         
         let vin2: VIN = "WAUZZZ4L78D067850"
-        #expect(vin2.checksumDigit == "7", "Checksum digit should be '7'")
+        #expect(vin2.actualCheckDigit == "7", "Checksum digit should be '7'")
         
         let vin3: VIN = "1G1YY25RX85104727"
-        #expect(vin3.checksumDigit == "X", "Checksum digit should be 'X'")
+        #expect(vin3.actualCheckDigit == "X", "Checksum digit should be 'X'")
         
         let invalidVin: VIN = "INVALID"
-        #expect(invalidVin.checksumDigit == nil, "Invalid VIN should return nil checksum digit")
+        #expect(invalidVin.actualCheckDigit == nil, "Invalid VIN should return nil checksum digit")
     }
     
     @Test("Checksum validation")
@@ -288,54 +288,76 @@ struct VINTests {
         #expect(vin.wmi == "WAU")
         #expect(vin.vds == "ZZZ8X7")
         #expect(vin.vis == "CB000001")
-        #expect(vin.checksumDigit == "7")
-        
-        // Test with invalid VIN
-        let invalidVin: VIN = "INVALID"
-        #expect(invalidVin.wmi == "", "Invalid VIN should return empty WMI")
-        #expect(invalidVin.vds == "", "Invalid VIN should return empty VDS")
-        #expect(invalidVin.vis == "", "Invalid VIN should return empty VIS")
+        #expect(vin.actualCheckDigit == "7")
+
+        // Structure decodes from any prefix, independent of full validity.
+        let prefix: VIN = "WAU"
+        #expect(prefix.wmi == "WAU")
+        #expect(prefix.vds == "")
+        #expect(prefix.vis == "")
+        #expect(prefix.actualCheckDigit == nil, "No check digit before position 9")
     }
-    
-    @Test("WMI region lookup")
-    func testRegion() throws {
-        let vin: VIN = "WAUZZZ8X7CB000001"
-        #expect(vin.wmiRegion != "?")
-        
-        // Test known regions
-        let usVin: VIN = "1HGBH41JXMN109186"
-        #expect(usVin.wmiRegion != "?", "US VIN should have a region")
-        
-        let euVin: VIN = "WBAJA9105KB304806"
-        #expect(euVin.wmiRegion != "?", "EU VIN should have a region")
+
+    @Test("Region code (ISO 3166-1 alpha-2)")
+    func testRegionCode() throws {
+        #expect(VIN(content: "WAUZZZ8X7CB000001").regionCode == "DE")
+        #expect(VIN(content: "1HGBH41JXMN109186").regionCode == "US")
+        #expect(VIN(content: "JN1TFNT32A0041590").regionCode == "JP")
+        #expect(VIN(content: "KMHWF35H66A023847").regionCode == "KR")
+        // Decodes from a 2-character prefix, no full VIN required.
+        #expect(VIN(content: "WB").regionCode == "DE")
+        #expect(VIN(content: "1").regionCode == nil, "One character is ambiguous")
     }
-    
-    @Test("WMI country lookup")
-    func testCountry() throws {
-        let vin: VIN = "WAUZZZ8X7CB000001"
-        #expect(vin.wmiCountry != "?")
-        
-        // Test known countries
-        let usVin: VIN = "1HGBH41JXMN109186"
-        #expect(usVin.wmiCountry != "?", "US VIN should have a country")
-        
-        let germanVin: VIN = "WBAJA9105KB304806"
-        #expect(germanVin.wmiCountry != "?", "German VIN should have a country")
+
+    @Test("Continent and flag")
+    func testContinentAndFlag() throws {
+        #expect(VIN(content: "WAU").region == .europe)
+        #expect(VIN(content: "1HG").region == .northAmerica)
+        #expect(VIN(content: "JHM").region == .asia)
+        #expect(VIN(content: "WAUZZZ8X7CB000001").flag == "🇩🇪")
+        #expect(VIN(content: "1HGBH41JXMN109186").flag == "🇺🇸")
     }
-    
-    @Test("WMI manufacturer lookup")
+
+    @Test("Manufacturer lookup")
     func testManufacturer() throws {
-        let vin: VIN = "WAUZZZ8X7CB000001"
-        #expect(vin.wmiManufacturer != "?")
-        
-        // Test known manufacturers
-        let hondaVin: VIN = "1HGBH41JXMN109186"
-        #expect(hondaVin.wmiManufacturer != "?", "Honda VIN should have a manufacturer")
-        
-        let bmwVin: VIN = "WBAJA9105KB304806"
-        #expect(bmwVin.wmiManufacturer != "?", "BMW VIN should have a manufacturer")
+        #expect(VIN(content: "WAUZZZ8X7CB000001").manufacturer == "Audi")
+        #expect(VIN(content: "1HGBH41JXMN109186").manufacturer?.contains("Honda") == true)
+        // Resolves from a 3-character WMI prefix.
+        #expect(VIN(content: "WAU").manufacturer == "Audi")
+        // Unknown WMI returns nil (not a sentinel).
+        #expect(VIN(content: "WZZ").manufacturer == nil)
     }
-    
+
+    @Test("Model year, assembly plant, serial")
+    func testAnatomy() throws {
+        let vin: VIN = "1HGBH41JXMN109186"
+        #expect(vin.modelYear == 2021, "Position 10 'M' is 2021")
+        #expect(vin.assemblyPlant == "N")
+        #expect(vin.serialNumber == "109186")
+        // Needs at least 10 characters.
+        #expect(VIN(content: "1HGBH41JX").modelYear == nil)
+    }
+
+    @Test("Expected vs actual check digit")
+    func testExpectedCheckDigit() throws {
+        let valid: VIN = "1HGBH41JXMN109186"
+        #expect(valid.expectedCheckDigit == "X")
+        #expect(valid.actualCheckDigit == valid.expectedCheckDigit)
+
+        let wrong: VIN = "1HGBH41J0MN109186"
+        #expect(wrong.expectedCheckDigit == "X")
+        #expect(wrong.actualCheckDigit == "0")
+        #expect(!wrong.isChecksumValid)
+    }
+
+    @Test("Lowercase input is normalized")
+    func testLowercaseNormalization() throws {
+        let vin = VIN(content: "1hgbh41jxmn109186")
+        #expect(vin.content == "1HGBH41JXMN109186")
+        #expect(vin.isValid)
+        #expect(vin.validity == .validWithChecksum)
+    }
+
     @Test("Identifiable conformance")
     func testIdentifiable() {
         let vin: VIN = "1HGBH41JXMN109186"
@@ -367,7 +389,7 @@ struct VINTests {
         // Test empty string
         let emptyVin = VIN(content: "")
         #expect(!emptyVin.isValid)
-        #expect(emptyVin.checksumDigit == nil)
+        #expect(emptyVin.actualCheckDigit == nil)
         #expect(emptyVin.wmi == "")
         #expect(emptyVin.vds == "")
         #expect(emptyVin.vis == "")
