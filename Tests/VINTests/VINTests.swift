@@ -363,8 +363,8 @@ struct VINTests {
         #expect(VIN(content: "3C3").manufacturer == "Chrysler Mexico")
         #expect(VIN(content: "ZAC").manufacturer == "FCA Italy")
         #expect(VIN(content: "WD2").manufacturer == "DaimlerChrysler")
-        #expect(VIN(content: "101").manufacturer == "MO TRAILERS CORP.")
-        #expect(VIN(content: "W08").manufacturer == "ADAM OPEL AG")
+        #expect(VIN(content: "101").manufacturer == "Mo Trailers Corp.")
+        #expect(VIN(content: "W08").manufacturer == "Adam Opel AG")
         // vPIC also lists low-volume 6-character WMIs such as 1A9841,
         // but those are VIN positions 1-3 plus 12-14 and intentionally
         // outside this package's 3-character WMI lookup.
