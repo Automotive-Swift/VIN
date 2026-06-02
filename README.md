@@ -10,7 +10,7 @@ A zero-dependency Swift package for handling ISO 3779 Vehicle Identification Num
 - ✅ **Syntactic validation** according to ISO 3779 standard
 - ✅ **Checksum validation** for all VINs (recognizing it's not mandatory worldwide)
 - ✅ **VIN decomposition** into WMI, VDS, and VIS components
-- ✅ **Localized manufacturer lookup** supporting 561+ manufacturers across multiple languages
+- ✅ **Manufacturer lookup** covering 3,200+ WMIs, returned as proper-noun names
 - ✅ **Smart VIN proposal** that sanitizes and fixes invalid VINs
 - ✅ **Zero dependencies** - pure Swift implementation
 - ✅ **Protocol conformances**: `Equatable`, `Identifiable`, `CustomStringConvertible`, `ExpressibleByStringLiteral`, `Codable`
@@ -133,7 +133,9 @@ let withChecksum = european.propose()
 
 ## Identity & localization
 
-Manufacturer names ship as a built-in Swift directory (650+ WMIs) and are returned as proper nouns. Country localization is delegated to the operating system: `regionCode` is an ISO 3166-1 alpha-2 code, and `countryName` resolves it through `Locale` — so country names localize automatically in *every* OS language, with no bundled string tables to maintain.
+Manufacturer names ship as a built-in Swift directory (3,200+ WMIs) and are returned as proper nouns. Country localization is delegated to the operating system: `regionCode` is an ISO 3166-1 alpha-2 code, and `countryName` resolves it through `Locale` — so country names localize automatically in *every* OS language, with no bundled string tables to maintain.
+
+> **Data source.** The WMI directory is backed by the [NHTSA vPIC](https://vpic.nhtsa.dot.gov/) registry. Because vPIC is US-centric, coverage is strongest for manufacturers that certify vehicles for the US market; purely regional makers without US registration may be absent. Low-volume 6-character WMIs (VIN positions 1–3 plus 12–14) are intentionally omitted, since the directory keys on positions 1–3 only.
 
 ```swift
 let audiVin: VIN = "WAUZZZ4L78D067850"

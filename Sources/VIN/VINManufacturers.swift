@@ -8,9 +8,11 @@
 /// Manufacturer names are proper nouns and intentionally not localized.
 /// Lookup tries the full 3-character WMI first, then the 2-character prefix.
 ///
-/// Coverage is supplemented by the NHTSA vPIC WMI list. Low-volume 6-character
-/// WMIs (VIN positions 1–3 plus 12–14) are intentionally omitted, since this
-/// table keys on positions 1–3 only. Entries are sorted by key.
+/// Coverage is backed by the NHTSA vPIC WMI registry. Because vPIC is
+/// US-centric, manufacturers that certify for the US market are covered best;
+/// purely regional makers without US registration may be absent. Low-volume
+/// 6-character WMIs (VIN positions 1–3 plus 12–14) are intentionally omitted,
+/// since this table keys on positions 1–3 only. Entries are sorted by key.
 let vinManufacturers: [String: String] = [
     "101": "Mo Trailers Corp.", "102": "Camelot Motors", "10B": "Brenner Tank LLC",
     "10H": "Hudson Brothers Trailer Mfg., Inc.", "10R": "Textron E-Z-Go LLC", "10T": "Oshkosh Corporation",
