@@ -389,6 +389,17 @@ struct VINTests {
         // but those are VIN positions 1-3 plus 12-14 and intentionally
         // outside this package's 3-character WMI lookup.
         #expect(VIN(content: "1A9841").manufacturer == nil)
+        // The whole W1x block is Mercedes-Benz; W1T (Mercedes-Benz trucks) was a gap
+        // that NHTSA vPIC does not register but the Wikibooks WMI table lists.
+        #expect(VIN(content: "W1T96423010672244").manufacturer == "Mercedes-Benz")
+        #expect(VIN(content: "W1T").manufacturer == "Mercedes-Benz")
+        // Family fills cross-checked against the Wikibooks WMI table (gaps within blocks
+        // we already cover): a representative sample.
+        #expect(VIN(content: "JT7").manufacturer == "Toyota")
+        #expect(VIN(content: "KNC").manufacturer == "Kia")
+        #expect(VIN(content: "1GA").manufacturer == "Chevrolet")
+        #expect(VIN(content: "KM8").manufacturer == "Hyundai")
+        #expect(VIN(content: "WV4").manufacturer == "Volkswagen Commercial")
         // Unknown WMI returns nil (not a sentinel).
         #expect(VIN(content: "WZZ").manufacturer == nil)
     }
