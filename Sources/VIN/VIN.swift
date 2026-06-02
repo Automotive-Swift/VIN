@@ -80,6 +80,15 @@ public struct VIN: Equatable, Hashable, Sendable {
         Self.calculateChecksum(for: self.content)
     }
 
+    /// Whether position 9 carries a *mandatory* ISO 3779 check digit.
+    ///
+    /// The check digit is required only for VINs assigned to North America (leading WMI
+    /// character `1`–`5`, i.e. ``region`` is ``Continent/northAmerica``). Manufacturers in
+    /// other regions use that position freely — VW VINs, for instance, place a `Z` filler
+    /// there — so a non-matching ``expectedCheckDigit`` on such a VIN is not a defect.
+    /// Decodes from the leading character, so it is usable for live, as-you-type input.
+    public var requiresCheckDigit: Bool { self.region == .northAmerica }
+
     // MARK: Structure (decode from any sufficiently long prefix)
 
     /// The World Manufacturer Identifier (positions 1–3, or fewer if the prefix is shorter).

@@ -102,6 +102,26 @@ struct VINTests {
         }
     }
 
+    @Test("Only North American VINs require a check digit")
+    func testRequiresCheckDigit() {
+        // North America (leading 1–5): position 9 is a mandatory check digit.
+        for vinString in ["1HGBH41JXMN109186", "2T1BURHE0JC014567", "3VWLL7AJ9BM053123",
+                          "4S4BRBCC5F3284601", "5YJ3E1EA7JF005252"] {
+            #expect(VIN(content: vinString).requiresCheckDigit, "\(vinString) is North American")
+        }
+
+        // Europe / Asia: position 9 is free-form (e.g. VW's `Z` filler).
+        for vinString in ["WVWZZZ3DZ88005052", "WAUZZZ4L78D067850", "JN1TFNT32A0041590",
+                          "KMHWF35H66A023847", "LVSFBFACXDF123456"] {
+            #expect(!VIN(content: vinString).requiresCheckDigit, "\(vinString) is not North American")
+        }
+
+        // Decodes from a single leading character for as-you-type use.
+        #expect(VIN(content: "1").requiresCheckDigit)
+        #expect(!VIN(content: "W").requiresCheckDigit)
+        #expect(!VIN(content: "").requiresCheckDigit)
+    }
+
     @Test("Backward compatibility of isValid property")
     func testIsValidBackwardCompatibility() {
         // Ensure isValid works as before for backward compatibility
