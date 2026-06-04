@@ -400,6 +400,13 @@ struct VINTests {
         #expect(VIN(content: "1GA").manufacturer == "Chevrolet")
         #expect(VIN(content: "KM8").manufacturer == "Hyundai")
         #expect(VIN(content: "WV4").manufacturer == "Volkswagen Commercial")
+        // Web-verified Wikibooks fills (independently corroborated + adversarially
+        // re-checked): a cross-region sample.
+        #expect(VIN(content: "1GR").manufacturer == "Great Dane Trailers")
+        #expect(VIN(content: "ZDT").manufacturer == "De Tomaso")
+        #expect(VIN(content: "X96").manufacturer == "GAZ")
+        #expect(VIN(content: "LFZ").manufacturer == "Leapmotor")
+        #expect(VIN(content: "KMF").manufacturer == "Hyundai")
         // Unknown WMI returns nil (not a sentinel).
         #expect(VIN(content: "WZZ").manufacturer == nil)
     }
