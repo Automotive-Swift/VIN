@@ -100,10 +100,22 @@ public struct VIN: Equatable, Hashable, Sendable {
     /// The Vehicle Identification Section (positions 10–17).
     public var vis: String { String(self.content.dropFirst(9)) }
 
-    /// The model-year code decoded from position 10 (North American cycle; see ``vinModelYearCodes``).
+    /// The model year decoded from position 10, disambiguated by position 7.
+    ///
+    /// Position-10 codes repeat on a 30-year cycle, so the code alone is ambiguous (e.g.
+    /// `M` is 1991 *or* 2021). Position 7 resolves it: a letter there denotes model years
+    /// 2010–2039, a digit denotes 1980–2009 (manufacturers switched position 7 to a letter
+    /// in 2010 to extend the scheme). ``vinModelYearCodes`` holds the 2000–2029 window;
+    /// this shifts by ±30 years into the window position 7 selects.
     public var modelYear: Int? {
-        guard self.content.count >= 10 else { return nil }
-        return vinModelYearCodes[Array(self.content)[9]]
+        let chars = Array(self.content)
+        guard chars.count >= 10, let base = vinModelYearCodes[chars[9]] else { return nil }
+        let position7IsLetter = chars[6].isLetter
+        if base <= 2009 {           // codes Y, 1–9 → 2000–2009 in the base window
+            return position7IsLetter ? base + 30 : base
+        } else {                    // codes A–X → 2010–2029 in the base window
+            return position7IsLetter ? base : base - 30
+        }
     }
 
     /// The assembly-plant character at position 11, or `nil` if absent.

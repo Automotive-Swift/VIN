@@ -414,13 +414,27 @@ struct VINTests {
     @Test("Model year, assembly plant, serial")
     func testAnatomy() throws {
         let vin: VIN = "1HGBH41JXMN109186"
-        #expect(vin.modelYear == 2021, "Position 10 'M' is 2021")
+        // Position 10 'M' with a digit at position 7 ('1') => 1980–2009 window => 1991
+        // (this is the canonical sample VIN, a 1991 Honda Accord), not 2021.
+        #expect(vin.modelYear == 1991, "Position 10 'M' + digit position 7 is 1991")
         #expect(vin.assemblyPlant == "N")
         #expect(vin.serialNumber == "109186")
         // Needs at least 10 characters.
         #expect(VIN(content: "1HGBH41JX").modelYear == nil)
         #expect(VIN(content: "1HGBH41JXM").assemblyPlant == nil)
         #expect(VIN(content: "1HGBH41JXMN").serialNumber == nil)
+    }
+
+    @Test("Model year disambiguated by position 7")
+    func testModelYearPosition7() {
+        // Digit at position 7 => 1980–2009 window
+        #expect(VIN(content: "1HGCM82633A004352").modelYear == 2003)  // pos7 '2', pos10 '3'
+        #expect(VIN(content: "WVWZZZ3DZ88005052").modelYear == 2008)  // pos7 '3', pos10 '8'
+        #expect(VIN(content: "WP0AB29948S730159").modelYear == 2008)  // pos7 '9', pos10 '8'
+        #expect(VIN(content: "1HGBH41JXMN109186").modelYear == 1991)  // pos7 '1', pos10 'M'
+        // Letter at position 7 => 2010–2039 window
+        #expect(VIN(content: "5YJ3E1EA7JF005252").modelYear == 2018)  // pos7 'E', pos10 'J'
+        #expect(VIN(content: "WBA3A5C50CF256736").modelYear == 2012)  // pos7 'C', pos10 'C'
     }
 
     @Test("Expected vs actual check digit")
